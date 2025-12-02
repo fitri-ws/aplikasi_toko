@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # aplikasi_toko
 
 A new Flutter project.
@@ -14,3 +15,8 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# aplikasi_toko menggunakan flutter
+
+......
+>>>>>>> 386b082946f2862b8da0bfda41cb9b037f8e87bb
