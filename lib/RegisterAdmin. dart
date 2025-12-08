@@ -1,14 +1,136 @@
 import 'package:flutter/material.dart';
 
-class Login extends StatelessWidget {
-  const Login({super.key});
+// Halaman pendaftaran andim (simulasi tanpa database)
+class AdminRegisterPage extends StatefulWidget {
+  const AdminRegisterPage({super.key});
+  @override
+  State<AdminRegisterPage> createState() => _AdminRegisterPageState();
+}
+
+class _AdminRegisterPageState extends State<AdminRegisterPage> {
+  // key untuk validasi form
+  final _formKey = GlobalKey<FormState>();
+  // controller untuk menangani input dari TextFormField
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEiditingController();
+  final TextEditingController _confirmController = TextEditingController();
+
+  // untuk menampilkan loading saat proses submit
+  booln _isLoading = false;
+
+  // Fungsi dipanggil saat tombol Daftar ditekan
+  void _submitForm() {
+    // cek validasi form
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        -isLoading = true; // Tampilan loading
+      });
+      // simulasi proses pendaftaran tanpa database (delay 2 detik)
+      Future.delayed(const Duration(seconds: 2), () {
+        setState(() {
+          _isLoading = false; // Sembunyikan loading
+        });
+        // Tampilkan dialog sukses
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Sukses"),
+            content: const Text("Admin berhasil didaftarkan (simulasi)"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context), // Tutup dialog
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+
+        // Reset semua field setelah submit
+        _nameController.clear();
+        _emailController.clear();
+        _passwordController.clear();
+        _confirmController.clear();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: const Center(
-        child: Text('Ini Halaman Login', style: TextStyle(fontSize: 22)),
+      appBar: AppBar(
+        title: const Text("Daftar Admin"), // Judul halaman
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0), // Jarak dari tepi layar
+        child: Form(
+          key: _formKey, // Assign form key
+          child: ListView(
+            children: [
+              // Field input Nama Lengkap
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: "Nama Lengkap"),
+                validator: (value) =>
+                    value!.isEmpty ? "Nama tidak boleh kosong" : null,
+              ),
+              const SizedBox(height: 16), // Jarak antar field
+
+              // Field input Email
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: "Email"),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) =>
+                    value!.isEmpty ? "Email tidak boleh kosong" : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Field input No Telepon
+              TextFormField(
+                controller: _noteleponController,
+                decoration: const InputDecoration(labelText: "No_Telepon"),
+                keyboardType: TextInputType.noteleponlAddress,
+                validator: (value) =>
+                    value!.isEmpty ? "Email tidak boleh kosong" : null,
+
+              // Field input Password
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: "Password"),
+                obscureText: true, // Sembunyikan teks
+                validator: (value) =>
+                    value!.length < 8 ? "Password minimal 8 karakter" : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Field input Konfirmasi Password
+              TextFormField(
+                controller: _confirmController,
+                decoration:
+                    const InputDecoration(labelText: "Konfirmasi Password"),
+                obscureText: true,
+                validator: (value) => value != _passwordController.text
+                    ? "Password tidak cocok"
+                    : null,
+              ),
+              const SizedBox(height: 24),
+
+              // Tombol Daftar Admin
+              ElevatedButton(
+                onPressed: _isLoading ? null : _submitForm, // Disable saat loading
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        color: Colors.white, // Loading indicator
+                      )
+                    : const Text("Daftar Admin"), // Teks tombol
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+          
+
