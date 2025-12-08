@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login.dart'; // Mengimpor halaman login agar bisa dipanggil nanti
+import 'loginuser.dart'; // Mengimpor halaman login agar bisa dipanggil nanti
 
 // Halaman Logo (Splash Screen)
 class LogoPage extends StatefulWidget {
@@ -19,7 +19,7 @@ class _LogoPageState extends State<LogoPage> {
       // Navigator.pushReplacement = pindahkan halaman dan hapus halaman sebelumnya
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Login()),
+        MaterialPageRoute(builder: (context) => const LoginUser()),
       );
     });
   }
