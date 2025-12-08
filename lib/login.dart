@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 // Halaman Login menggunakan StatefulWidget agar bisa mengubah state seperti loading
-class Login extends StatefulWidget {
-  const Login({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
   State<Login> createState() => _LoginPageState();
