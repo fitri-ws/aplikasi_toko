@@ -12,10 +12,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // MaterialApp = kerangka utama aplikasi
     return MaterialApp(
-      debugShowCheckedModeBanner:
-          false, // Menghilangkan tulisan debug merah di pojok
-      // Halaman pertama yang ditampilkan saat aplikasi dibuka
-      home: const Logo(), // Aplikasi masuk ke halaman logo terlebih dahulu
+      debugShowCheckedModeBanner: false, // Menghilangkan tulisan debug merah di pojok
+      initialRoute: '/login',
+        '/login': (context) => const LoginPage(),
     );
   }
 }
