@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'logo.dart'; // Mengimpor halaman LogoPage agar bisa dijadikan halaman pertama
-import 'login.dart';
+import 'loginuser.dart';
 
 void main() {
   runApp(const MyApp()); // Menjalankan aplikasi Flutter
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       // semua halam dimasukkan ke routes
       routes: {
         '/logo': (context) => const LogoPage(),
-        '/login': (context) => const LoginPage(),
+        '/login': (context) => const LoginUser(),
       },
     );
   }
