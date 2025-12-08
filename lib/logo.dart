@@ -9,13 +9,13 @@ class LogoPage extends StatefulWidget {
   State<Logo> createState() => _LogoPageState();
 }
 
-class _LogoPageState extends State<Logo> {
+class _LogoPageState extends State<LogoPage> {
   @override
   void initState() {
     super.initState();
 
-    // Menunggu 2 detik sebelum pindah ke halaman login
-    Future.delayed(const Duration(seconds: 2), () {
+    // Menunggu 5 detik sebelum pindah ke halaman login
+    Future.delayed(const Duration(seconds: 5), () {
       // Navigator.pushReplacement = pindahkan halaman dan hapus halaman sebelumnya
       Navigator.pushReplacement(
         context,
