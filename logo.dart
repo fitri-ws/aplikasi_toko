@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'login.dart'; // Mengimpor halaman login agar bisa dipanggil nanti
 
 // Halaman Logo (Splash Screen)
-class Logo extends StatefulWidget {
-  const Logo({super.key});
+class LogoPage extends StatefulWidget {
+  const LogoPage({super.key});
 
   @override
-  State<Logo> createState() => _LogoPageState();
+  State<LogoPage> createState() => _LogoPageState();
 }
 
-class _LogoPageState extends State<Logo> {
+class _LogoPageState extends State<LogoPage> {
   @override
   void initState() {
     super.initState();
@@ -71,3 +71,4 @@ class _LogoPageState extends State<Logo> {
     );
   }
 }
+
