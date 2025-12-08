@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'login.dart'; // Mengimpor halaman login agar bisa dipanggil nanti
 
 // Halaman Logo (Splash Screen)
-class Logo extends StatefulWidget {
-  const Logo({super.key});
+class LogoPage extends StatefulWidget {
+  const LogoPage({super.key});
 
   @override
   State<Logo> createState() => _LogoPageState();
