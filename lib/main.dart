@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'logo.dart'; // Mengimpor halaman LogoPage agar bisa dijadikan halaman pertama
+import 'login.dart';
 
 void main() {
   runApp(const MyApp()); // Menjalankan aplikasi Flutter
@@ -13,8 +14,14 @@ class MyApp extends StatelessWidget {
     // MaterialApp = kerangka utama aplikasi
     return MaterialApp(
       debugShowCheckedModeBanner: false, // Menghilangkan tulisan debug merah di pojok
-      initialRoute: '/login',
+      title: 'PhoneStation',
+      // Halaman pertma yang muncul
+      home: const LogoPage(),
+      // semua halam dimasukkan ke routes
+      routes: {
+        '/logo': (context) => const LogoPage(),
         '/login': (context) => const LoginPage(),
+      },
     );
   }
 }
