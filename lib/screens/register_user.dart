@@ -1,63 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:aplikasi_toko/services/auth_service.dart';
+import 'package:aplikasi_toko/screens/home_screen.dart';
 
-// Halaman pendaftaran admin (simulasi tanpa database)
-class AdminRegisterPage extends StatefulWidget {
-  const AdminRegisterPage({super.key});
-
+class RegisterUserPage extends StatefulWidget {
+  const RegisterUserPage({super.key});
+  
   @override
-  State<AdminRegisterPage> createState() => _AdminRegisterPageState();
+  State<RegisterUserPage> createState() => _RegisterUserPageState();
 }
 
-class _AdminRegisterPageState extends State<AdminRegisterPage> {
-  // key untuk validasi form
+class _RegisterUserPageState extends State<RegisterUserPage> {
   final _formKey = GlobalKey<FormState>();
-  // controller untuk menangani input dari TextFormField
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
-
-  // untuk menampilkan loading saat proses submit
+  final AuthService _authService = AuthService();
+  
   bool _isLoading = false;
 
-  // Fungsi dipanggil saat tombol Daftar ditekan
-  void _submitForm() {
-    // cek validasi form
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true; // Tampilan loading
+        _isLoading = true;
       });
-      // simulasi proses pendaftaran tanpa database (delay 2 detik)
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() {
-          _isLoading = false; // Sembunyikan loading
-        });
-        // Tampilkan dialog sukses
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Sukses"),
-            content: const Text("Admin berhasil didaftarkan (simulasi)"),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Tutup dialog
-                  Navigator.pop(context); // Kembali ke halaman sebelumnya
-                },
-                child: const Text("OK"),
-              ),
-            ],
-          ),
+      
+      bool success = await _authService.register(
+        _nameController.text,
+        _emailController.text,
+        _phoneController.text,
+        _passwordController.text,
+        isUser: true,
+      );
+      
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (success) {
+        // Navigate to home screen after successful registration
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
-
-        // Reset semua field setelah submit
-        _nameController.clear();
-        _emailController.clear();
-        _phoneController.clear();
-        _passwordController.clear();
-        _confirmController.clear();
-      });
+      } else {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration failed. Please try again.")),
+        );
+      }
     }
   }
 
@@ -65,17 +57,42 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Daftar Admin"), // Judul halaman
+        title: const Text("Daftar Akun"),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0), // Jarak dari tepi layar
+        padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Assign form key
+          key: _formKey,
           child: ListView(
             children: [
-              // Field input Nama Lengkap
+              const SizedBox(height: 20),
+              const Icon(
+                Icons.person_add,
+                size: 80,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Daftar Akun Baru",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Buat akun untuk mengakses semua fitur",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 30),
+              
+              // Name field
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -90,9 +107,9 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16), // Jarak antar field
+              const SizedBox(height: 16),
 
-              // Field input Email
+              // Email field
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -113,7 +130,7 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
               ),
               const SizedBox(height: 16),
 
-              // Field input No Telepon
+              // Phone field
               TextFormField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
@@ -131,7 +148,7 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
               ),
               const SizedBox(height: 16),
 
-              // Field input Password
+              // Password field
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(
@@ -139,7 +156,7 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
                 ),
-                obscureText: true, // Sembunyikan teks
+                obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Password tidak boleh kosong";
@@ -152,7 +169,7 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
               ),
               const SizedBox(height: 16),
 
-              // Field input Konfirmasi Password
+              // Confirm password field
               TextFormField(
                 controller: _confirmController,
                 decoration: const InputDecoration(
@@ -171,13 +188,13 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
-              // Tombol Daftar Admin
+              // Register button
               SizedBox(
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _submitForm, // Disable saat loading
+                  onPressed: _isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
@@ -185,16 +202,26 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
                     ),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white, // Loading indicator
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                          "Daftar Admin",
+                          "Daftar Akun",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                          ), // Teks tombol
+                            color: Colors.white,
+                          ),
                         ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Login link
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Sudah punya akun? Masuk disini"),
                 ),
               ),
             ],

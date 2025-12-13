@@ -1,40 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:aplikasi_toko/services/auth_service.dart';
-import 'package:aplikasi_toko/screens/register_user.dart';
 import 'package:aplikasi_toko/screens/home_screen.dart';
 
-// Halaman Login menggunakan StatefulWidget agar bisa mengubah state seperti loading
-class LoginUser extends StatefulWidget {
-  const LoginUser({super.key});
+class LoginAdmin extends StatefulWidget {
+  const LoginAdmin({super.key});
 
   @override
-  State<LoginUser> createState() => _LoginPageState();
+  State<LoginAdmin> createState() => _LoginAdminState();
 }
 
-class _LoginPageState extends State<LoginUser> {
-  // Controller untuk mengambil inputan email dan password
+class _LoginAdminState extends State<LoginAdmin> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  bool isLoading = false; // untuk menampilkan loading ketika login ditekan
+  bool isLoading = false;
 
-  // Fungsi login dengan auth service
   void login() async {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
       setState(() {
-        isLoading = true; // tampilkan loading
+        isLoading = true;
       });
 
-      // Attempt to login
+      // Attempt to login as admin
       bool success = await _authService.login(
         emailController.text,
         passwordController.text,
-        isUser: true,
+        isUser: false, // This indicates admin login
       );
 
       setState(() {
-        isLoading = false; // hilangkan loading
+        isLoading = false;
       });
 
       if (success) {
@@ -46,7 +42,7 @@ class _LoginPageState extends State<LoginUser> {
       } else {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Login gagal. Periksa kembali email dan password Anda.")),
+          const SnackBar(content: Text("Login admin gagal. Periksa kembali email dan password Anda.")),
         );
       }
     } else {
@@ -61,37 +57,35 @@ class _LoginPageState extends State<LoginUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // Semua isi halaman ditengah
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // =================== LOGO TOKO ====================
+              // Logo
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Colors.red.shade50,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.phone_android,
+                  Icons.admin_panel_settings,
                   size: 80,
-                  color: Colors.blue.shade700,
+                  color: Colors.red.shade700,
                 ),
               ),
               const SizedBox(height: 20),
 
-              // =================== JUDUL ====================
+              // Title
               const Text(
-                "Selamat Datang",
+                "Login Admin",
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(
-                "Silakan masuk untuk melanjutkan",
+                "Silakan masuk sebagai admin",
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -99,11 +93,11 @@ class _LoginPageState extends State<LoginUser> {
               ),
               const SizedBox(height: 40),
 
-              // =================== INPUT EMAIL ====================
+              // Email field
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(
-                  labelText: "Email",
+                  labelText: "Email Admin",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.email),
                 ),
@@ -111,10 +105,10 @@ class _LoginPageState extends State<LoginUser> {
               ),
               const SizedBox(height: 15),
 
-              // =================== INPUT PASSWORD ====================
+              // Password field
               TextFormField(
                 controller: passwordController,
-                obscureText: true, // password disembunyikan
+                obscureText: true,
                 decoration: const InputDecoration(
                   labelText: "Password",
                   border: OutlineInputBorder(),
@@ -123,23 +117,22 @@ class _LoginPageState extends State<LoginUser> {
               ),
               const SizedBox(height: 25),
 
-              // =================== TOMBOL LOGIN ====================
+              // Login button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : login, // nonaktif saat loading
+                  onPressed: isLoading ? null : login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  // Animasi loading atau teks login
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                          "Masuk",
+                          "Masuk sebagai Admin",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -151,38 +144,13 @@ class _LoginPageState extends State<LoginUser> {
 
               const SizedBox(height: 20),
 
-              // =================== LINK KE REGISTER ====================
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Belum punya akun?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegisterUserPage()),
-                      );
-                    },
-                    child: const Text(
-                      "Daftar",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Admin login link
+              // Back to user login
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/loginadmin');
+                  Navigator.pop(context);
                 },
                 child: const Text(
-                  "Masuk sebagai Admin",
+                  "Kembali ke login user",
                   style: TextStyle(
                     color: Colors.grey,
                     decoration: TextDecoration.underline,
