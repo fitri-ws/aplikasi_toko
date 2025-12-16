@@ -22,7 +22,136 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get smartphone by ID
+// Get recommended smartphones (sorted by overall score)
+router.get('/recommended', async (req, res) => {
+    try {
+        const [smartphones] = await db.query(`
+      SELECT s.*, 
+             COALESCE(AVG(r.rating), 0) as avg_rating,
+             COUNT(r.id) as review_count,
+             (COALESCE(s.performance_score, 0) + COALESCE(s.camera_score, 0) + 
+              COALESCE(s.connectivity_score, 0) + COALESCE(s.battery_score, 0)) / 4 as overall_score
+      FROM smartphones s
+      LEFT JOIN reviews r ON s.id = r.smartphone_id
+      WHERE s.stock > 0
+      GROUP BY s.id
+      ORDER BY overall_score DESC, s.price ASC
+      LIMIT 10
+    `);
+        res.json(smartphones);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get all unique brands
+router.get('/brands', async (req, res) => {
+    try {
+        const [brands] = await db.query(`
+      SELECT DISTINCT brand 
+      FROM smartphones 
+      ORDER BY brand ASC
+    `);
+        res.json(brands);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Search smartphones
+router.get('/search', async (req, res) => {
+    try {
+        const { q } = req.query;
+
+        if (!q) {
+            return res.status(400).json({ message: 'Search query is required' });
+        }
+
+        const [smartphones] = await db.query(`
+      SELECT s.*, 
+             COALESCE(AVG(r.rating), 0) as avg_rating,
+             COUNT(r.id) as review_count
+      FROM smartphones s
+      LEFT JOIN reviews r ON s.id = r.smartphone_id
+      WHERE s.name LIKE ? OR s.brand LIKE ? OR s.processor LIKE ?
+      GROUP BY s.id
+      ORDER BY s.created_at DESC
+    `, [`%${q}%`, `%${q}%`, `%${q}%`]);
+
+        res.json(smartphones);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get smartphones by brand
+router.get('/brand/:brand', async (req, res) => {
+    try {
+        const [smartphones] = await db.query(`
+      SELECT s.*, 
+             COALESCE(AVG(r.rating), 0) as avg_rating,
+             COUNT(r.id) as review_count
+      FROM smartphones s
+      LEFT JOIN reviews r ON s.id = r.smartphone_id
+      WHERE s.brand = ?
+      GROUP BY s.id
+      ORDER BY s.price ASC
+    `, [req.params.brand]);
+
+        res.json(smartphones);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get recommendations based on criteria
+router.get('/recommendations/best', async (req, res) => {
+    try {
+        const { criteria = 'overall' } = req.query;
+
+        let orderBy = 'performance_score DESC, camera_score DESC, battery_score DESC';
+
+        switch (criteria) {
+            case 'battery':
+                orderBy = 'battery_score DESC, performance_score DESC';
+                break;
+            case 'camera':
+                orderBy = 'camera_score DESC, performance_score DESC';
+                break;
+            case 'performance':
+                orderBy = 'performance_score DESC, ram DESC';
+                break;
+            case 'budget':
+                orderBy = 'price ASC, performance_score DESC';
+                break;
+            case 'premium':
+                orderBy = 'price DESC, performance_score DESC';
+                break;
+        }
+
+        const [smartphones] = await db.query(`
+      SELECT s.*, 
+             COALESCE(AVG(r.rating), 0) as avg_rating,
+             COUNT(r.id) as review_count
+      FROM smartphones s
+      LEFT JOIN reviews r ON s.id = r.smartphone_id
+      GROUP BY s.id
+      ORDER BY ${orderBy}
+      LIMIT 6
+    `);
+
+        res.json(smartphones);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get smartphone by ID (must be after specific routes)
 router.get('/:id', async (req, res) => {
     try {
         const [smartphones] = await db.query(`
@@ -55,58 +184,15 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Get recommendations based on criteria
-router.get('/recommendations/best', async (req, res) => {
-    try {
-        const { criteria = 'overall' } = req.query;
-
-        let orderBy = 'performance DESC, camera DESC, battery DESC';
-
-        switch (criteria) {
-            case 'battery':
-                orderBy = 'battery DESC, performance DESC';
-                break;
-            case 'camera':
-                orderBy = 'camera DESC, performance DESC';
-                break;
-            case 'performance':
-                orderBy = 'performance DESC, ram DESC';
-                break;
-            case 'budget':
-                orderBy = 'price ASC, performance DESC';
-                break;
-            case 'premium':
-                orderBy = 'price DESC, performance DESC';
-                break;
-        }
-
-        const [smartphones] = await db.query(`
-      SELECT s.*, 
-             COALESCE(AVG(r.rating), 0) as avg_rating,
-             COUNT(r.id) as review_count
-      FROM smartphones s
-      LEFT JOIN reviews r ON s.id = r.smartphone_id
-      GROUP BY s.id
-      ORDER BY ${orderBy}
-      LIMIT 6
-    `);
-
-        res.json(smartphones);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
 // Add smartphone (admin only)
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        const { name, brand, price, processor, ram, memory, screen, performance, camera, connectivity, battery, link, image_url, stock } = req.body;
+        const { name, brand, price, processor, ram, memory, screen_size, performance_score, camera_score, connectivity_score, battery_score, link, image_url, description, specifications, stock } = req.body;
 
         const [result] = await db.query(
-            `INSERT INTO smartphones (name, brand, price, processor, ram, memory, screen, performance, camera, connectivity, battery, link, image_url, stock)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [name, brand, price, processor, ram, memory, screen, performance, camera, connectivity, battery, link, image_url, stock]
+            `INSERT INTO smartphones (name, brand, price, processor, ram, memory, screen_size, performance_score, camera_score, connectivity_score, battery_score, link, image_url, description, specifications, stock)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [name, brand, price, processor, ram, memory, screen_size, performance_score, camera_score, connectivity_score, battery_score, link, image_url, description, specifications, stock]
         );
 
         res.status(201).json({ message: 'Smartphone added successfully', id: result.insertId });
@@ -119,12 +205,12 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 // Update smartphone (admin only)
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        const { name, brand, price, processor, ram, memory, screen, performance, camera, connectivity, battery, link, image_url, stock } = req.body;
+        const { name, brand, price, processor, ram, memory, screen_size, performance_score, camera_score, connectivity_score, battery_score, link, image_url, description, specifications, stock } = req.body;
 
         await db.query(
-            `UPDATE smartphones SET name=?, brand=?, price=?, processor=?, ram=?, memory=?, screen=?, performance=?, camera=?, connectivity=?, battery=?, link=?, image_url=?, stock=?
+            `UPDATE smartphones SET name=?, brand=?, price=?, processor=?, ram=?, memory=?, screen_size=?, performance_score=?, camera_score=?, connectivity_score=?, battery_score=?, link=?, image_url=?, description=?, specifications=?, stock=?
        WHERE id=?`,
-            [name, brand, price, processor, ram, memory, screen, performance, camera, connectivity, battery, link, image_url, stock, req.params.id]
+            [name, brand, price, processor, ram, memory, screen_size, performance_score, camera_score, connectivity_score, battery_score, link, image_url, description, specifications, stock, req.params.id]
         );
 
         res.json({ message: 'Smartphone updated successfully' });
